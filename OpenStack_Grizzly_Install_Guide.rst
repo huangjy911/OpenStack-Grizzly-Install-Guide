@@ -656,7 +656,42 @@ To start your first VM, we first need to create a new tenant, user and internal 
 
    cd /etc/init.d/; for i in $( ls quantum-* ); do sudo service $i restart; done
 
+<<<<<<< HEAD
 That's it ! Log on to your dashboard, create your secure key and modify your security groups then create your first VM.
+=======
+* Create an external network with the tenant id belonging to the admin tenant (keystone tenant-list to get the appropriate id)::
+
+   quantum net-create --tenant-id $put_id_of_admin_tenant ext_net --router:external=True
+
+* Create a subnet for the floating ips::
+
+   quantum subnet-create --tenant-id $put_id_of_admin_tenant --allocation-pool start=192.168.100.102,end=192.168.100.126 --gateway 192.168.100.1 ext_net 192.168.100.100/24 --enable_dhcp=False
+
+* Set your router's gateway to the external network:: 
+
+   quantum router-gateway-set $put_router_proj_one_id_here $put_id_of_ext_net_here
+
+* Source creds relative to your project one tenant now::
+
+   nano creds_proj_one
+
+   #Paste the following:
+   export OS_TENANT_NAME=project_one
+   export OS_USERNAME=user_one
+   export OS_PASSWORD=user_one
+   export OS_AUTH_URL="http://192.168.100.51:5000/v2.0/"
+
+   source creds_proj_one
+
+* Add this security rules to make your VMs pingable::
+
+   nova --no-cache secgroup-add-rule default icmp -1 -1 0.0.0.0/0
+   nova --no-cache secgroup-add-rule default tcp 22 22 0.0.0.0/0
+
+* Start by allocating a floating ip to the project one tenant::
+
+   quantum floatingip-create ext_net
+>>>>>>> 30ebeb7... Update OpenStack_Grizzly_Install_Guide.rst
 
 10. Licensing
 ============
